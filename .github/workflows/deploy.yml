@@ -6,8 +6,8 @@ on:
     - main
 
 env:
-  UNIQUE_APP_NAME: comicdownloader
-  AZURE_RESOURCE_GROUP_NAME: comic-downloader
+  UNIQUE_APP_NAME: orleanscomic
+  AZURE_RESOURCE_GROUP_NAME: orleanscomic
   AZURE_RESOURCE_GROUP_LOCATION: NorwayEast
 
 jobs:
