@@ -13,12 +13,15 @@ builder.Services.AddSingleton<ITelegramBotClient>(_ => new TelegramBotClient(bui
 builder.Services.AddGrainRouter();
 builder.Services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
 
+builder.Services.AddHealthChecks();
+
 var app = builder.Build();
 
 app.UseRouting();
 app.UseEndpoints(endpoints =>
 {
     endpoints.MapGrains();
+    endpoints.MapHealthChecks("health");
 });
 
 app.Run();

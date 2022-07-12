@@ -1,4 +1,5 @@
-﻿using System.Net.Sockets;
+﻿using System.Net;
+using System.Net.Sockets;
 using System.Reflection;
 using comic_downloader_orleans.Grains;
 using comic_downloader_orleans.OneDrive;
@@ -23,15 +24,25 @@ public static class OrleansExtensions
                 });
 
             if (builder.Environment.IsDevelopment())
+            {
                 c.UseLocalhostClustering()
                     .AddMemoryGrainStorageAsDefault()
                     .ConfigureEndpoints("localhost", 9889, 9099, AddressFamily.InterNetwork, true)
                     .UseInMemoryReminderService()
                     .AddStartupTask(StartupTask)
                     .ConfigureLogging(logging => logging.AddConsole());
-    
+            }
             else
             {
+                var endpointAddress = IPAddress.Parse(builder.Configuration["WEBSITE_PRIVATE_IP"]);
+                var strPorts = builder.Configuration["WEBSITE_PRIVATE_PORTS"].Split(',');
+                if (strPorts.Length < 2)
+                    throw new Exception("Insufficient private ports configured.");
+                var (siloPort, gatewayPort) =
+                    (int.Parse(strPorts[0]), int.Parse(strPorts[1]));
+                
+
+                c.ConfigureEndpoints(endpointAddress, siloPort, gatewayPort);
                 c.UseAzureStorageClustering(options => options.ConfigureTableServiceClient(builder.Configuration.GetValue<string>("azurestorage:connectionstring")));
                 c.AddAzureTableGrainStorageAsDefault(options =>
                 {
@@ -42,6 +53,7 @@ public static class OrleansExtensions
                     options.DeleteStateOnClear = true;
                 });
                 c.UseAzureTableReminderService(options => options.ConfigureTableServiceClient(builder.Configuration.GetValue<string>("azurestorage:connectionstring")));
+                c.ConfigureLogging(logging => logging.AddConsole());
             }
 
             c.ConfigureApplicationParts(manager =>

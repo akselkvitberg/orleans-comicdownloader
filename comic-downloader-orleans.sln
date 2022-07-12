@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.2.32602.215
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "comic-downloader-orleans", "comic-downloader-orleans.csproj", "{EC2FA5D0-9EC2-4025-A639-75E1A53D5FB1}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{EC2FA5D0-9EC2-4025-A639-75E1A53D5FB1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EC2FA5D0-9EC2-4025-A639-75E1A53D5FB1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EC2FA5D0-9EC2-4025-A639-75E1A53D5FB1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EC2FA5D0-9EC2-4025-A639-75E1A53D5FB1}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {3694E7C7-AC5B-45B2-B8DA-2B5597560ED7}
+	EndGlobalSection
+EndGlobal
