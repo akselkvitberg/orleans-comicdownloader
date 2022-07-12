@@ -7,6 +7,12 @@
     <UserSecretsId>afe36593-0ac6-4ee6-97e9-cae5b4def2d7</UserSecretsId>
   </PropertyGroup>
 
+  <Target Name="ZipPublishOutput" AfterTargets="Publish">
+    <Delete Files="$(ProjectDir)\..\comic-downloader.zip" />
+    <ZipDirectory SourceDirectory="$(PublishDir)" DestinationFile="$(ProjectDir)\..\comic-downloader.zip" />
+  </Target>
+
+
   <ItemGroup>
     <PackageReference Include="Microsoft.Extensions.Configuration.UserSecrets" Version="6.0.1" />
     <PackageReference Include="Microsoft.Graph" Version="4.34.0" />
