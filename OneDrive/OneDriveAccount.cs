@@ -1,8 +1,6 @@
 ﻿using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json.Nodes;
-using comic_downloader_orleans.Grains;
-using Microsoft.Extensions.Options;
 using Microsoft.Graph;
 using Orleans;
 using Orleans.Concurrency;

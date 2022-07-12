@@ -3,7 +3,7 @@ using Orleans.Concurrency;
 
 namespace comic_downloader_orleans.Downloader;
 
-public interface ITuDownloader : IComicDownloader, IGrainWithIntegerKey
+public interface ITuDownloader : IComicDownloader, IGrainWithStringKey
 {
     
 }
@@ -22,7 +22,7 @@ public class TuDownloader : Grain, ITuDownloader
     {
         var httpClient = _factory.CreateClient();
 
-        var bytes = await httpClient.GetByteArrayAsync($"http://www.tu.no/?module=TekComics&service=image&id=lunch&key={DateTime.Now:yyyy-MM-dd}");
+        var bytes = await httpClient.GetByteArrayAsync($"https://www.tu.no/?module=TekComics&service=image&id={this.GetPrimaryKeyString()}&key={DateTime.Now:yyyy-MM-dd}");
 
         return bytes.AsImmutable();
     }

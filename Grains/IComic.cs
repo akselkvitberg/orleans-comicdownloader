@@ -2,7 +2,6 @@ using comic_downloader_orleans.Downloader;
 using comic_downloader_orleans.OneDrive;
 using comic_downloader_orleans.Telegram;
 using Orleans;
-using Orleans.Concurrency;
 using Orleans.Runtime;
 
 namespace comic_downloader_orleans.Grains;
@@ -40,8 +39,8 @@ public class Comic : Grain<ComicState>, IComic, IRemindable
         }
 
         var nextFirstTick = firstTick - DateTime.UtcNow; // aka dueTime
-        //var interval = TimeSpan.FromDays(1); // aka period
-        var interval = TimeSpan.FromMinutes(1);
+        var interval = TimeSpan.FromDays(1); // aka period
+        //var interval = TimeSpan.FromMinutes(1);
 
         await RegisterOrUpdateReminder(reminderName, nextFirstTick, interval);
     }
@@ -70,8 +69,9 @@ public class Comic : Grain<ComicState>, IComic, IRemindable
             IComicDownloader downloader = State.ComicHandler switch
             {
                 ComicHandler.VG => GrainFactory.GetGrain<IVgComicDownloader>(State.Id),
-                ComicHandler.TU => GrainFactory.GetGrain<ITuDownloader>(0),
+                ComicHandler.TU => GrainFactory.GetGrain<ITuDownloader>(State.Id),
                 ComicHandler.Xkcd => GrainFactory.GetGrain<IXkcdDownloader>(0),
+                ComicHandler.Rss => GrainFactory.GetGrain<IRssDownloader>(State.Id),
                 _ => GrainFactory.GetGrain<IVgComicDownloader>(State.Id),
             };
             
@@ -94,8 +94,11 @@ public class Comic : Grain<ComicState>, IComic, IRemindable
             var telegramPersistance = GrainFactory.GetGrain<ITelegramPersistance>(0);
             await telegramPersistance.SendComic(comicImage);
 
-            var oneDrive = GrainFactory.GetGrain<IOneDrive>(0);
-            await oneDrive.SendComic(State.Name, comicImage);
+            if (State.Save)
+            {
+                var oneDrive = GrainFactory.GetGrain<IOneDrive>(0);
+                await oneDrive.SendComic(State.Name, comicImage);
+            }
         }
         catch (Exception e)
         {
@@ -111,6 +114,7 @@ public class ComicState
     public string Id { get; set; }
     public ComicHandler ComicHandler { get; set; }
     public List<IComicImage> Images { get; set; } = new List<IComicImage>();
+    public bool Save { get; set; } = true;
 
     public HashSet<string> Hashes = new();
 }
@@ -120,4 +124,5 @@ public enum ComicHandler
     VG = 1,
     TU = 2,
     Xkcd = 3,
+    Rss = 4,
 }
