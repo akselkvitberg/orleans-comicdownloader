@@ -36,6 +36,9 @@ jobs:
           --template-file '.github/workflows/main.bicep' \
           --parameters location=${{ env.AZURE_RESOURCE_GROUP_LOCATION }} \
             appName=${{ env.UNIQUE_APP_NAME }} \
+            telegram_apikey=${{ secrets.TELEGRAM_APIKEY }} \
+            onedrive_clientid=${{ secrets.ONEDRIVE_CLIENTID }} \
+            vg_cookie=${{ secrets.VG_COOKIE }} \
           --debug
 
     - name: Webapp deploy

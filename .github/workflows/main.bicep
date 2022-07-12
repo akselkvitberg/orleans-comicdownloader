@@ -1,5 +1,8 @@
 param appName string
 param location string = resourceGroup().location
+param telegram_apikey string
+param onedrive_clientid string
+param vg_cookie string
 
 module storageModule 'storage.bicep' = {
   name: 'orleansStorageModule'
@@ -55,5 +58,8 @@ module siloModule 'app-service.bicep' = {
     appInsightsConnectionString: logsModule.outputs.appInsightsConnectionString
     appInsightsInstrumentationKey: logsModule.outputs.appInsightsInstrumentationKey
     storageConnectionString: storageModule.outputs.connectionString
+    vg_cookie: vg_cookie
+    onedrive_clientid: onedrive_clientid
+    telegram_apikey: telegram_apikey
   }
 }

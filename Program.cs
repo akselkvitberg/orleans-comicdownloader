@@ -1,4 +1,5 @@
 using comic_downloader_orleans;
+using Orleans;
 using Orleans.Http;
 using Telegram.Bot;
 
@@ -23,5 +24,6 @@ app.UseEndpoints(endpoints =>
     endpoints.MapGrains();
     endpoints.MapHealthChecks("health");
 });
+app.UseOrleansDashboard();
 
 app.Run();

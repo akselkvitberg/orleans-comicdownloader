@@ -4,6 +4,9 @@ param vnetSubnetId string
 param appInsightsInstrumentationKey string
 param appInsightsConnectionString string
 param storageConnectionString string
+param telegram_apikey string
+param onedrive_clientid string
+param vg_cookie string
 
 resource appServicePlan 'Microsoft.Web/serverfarms@2021-03-01' = {
   name: '${appName}-plan'
@@ -37,8 +40,20 @@ resource appService 'Microsoft.Web/sites@2021-03-01' = {
           value: appInsightsConnectionString
         }
         {
-          name: 'ORLEANS_AZURE_STORAGE_CONNECTION_STRING'
+          name: 'azurestorage__connectionstring'
           value: storageConnectionString
+        }
+        {
+          name: 'telegram__apikey'
+          value: telegram_apikey
+        }
+        {
+          name: 'onedrive__clientId'
+          value: onedrive_clientid
+        }
+        {
+          name: 'vg__cookie'
+          value: vg_cookie
         }
       ]
       alwaysOn: true
