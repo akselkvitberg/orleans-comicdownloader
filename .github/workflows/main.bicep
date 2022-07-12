@@ -9,7 +9,7 @@ module storageModule 'storage.bicep' = {
   }
 }
 
-module logsModule 'logs-and-insights.bicep' = {
+module logsModule 'logs-and-analytics.bicep' = {
   name: 'orleansLogModule'
   params: {
     operationalInsightsName: '${appName}-logs'
