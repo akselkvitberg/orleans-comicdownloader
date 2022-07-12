@@ -41,9 +41,26 @@ public class OneDriveAccount : Grain<OneDriveAccountState>, IOneDriveAccount, IR
         
         try
         {
-            var request = client.Me.Drive.Special.AppRoot.ItemWithPath($"{folderName}/{fileName}").Content.Request();
             using var ms = new MemoryStream(bytes.Value);
-            await request.PutAsync<DriveItem>(ms);
+            var totalLength = bytes.Value.Length;
+
+            if (totalLength > 4 * 1024 * 1024)
+            {
+                var request = client.Me.Drive.Special.AppRoot.ItemWithPath($"{folderName}/{fileName}")
+                    .CreateUploadSession().Request();
+
+                var uploadSession = await request.PostAsync();
+                int maxSliceSize = 320 * 1024;
+                var fileUploadTask = new LargeFileUploadTask<DriveItem>(uploadSession, ms, maxSliceSize);
+
+                await fileUploadTask.UploadAsync();
+            }
+            else
+            {
+                var request = client.Me.Drive.Special.AppRoot.ItemWithPath($"{folderName}/{fileName}").Content
+                    .Request();
+                await request.PutAsync<DriveItem>(ms);
+            }
         }
         catch (Exception e)
         {

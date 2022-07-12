@@ -2,6 +2,7 @@ using comic_downloader_orleans.Downloader;
 using comic_downloader_orleans.OneDrive;
 using comic_downloader_orleans.Telegram;
 using Orleans;
+using Orleans.Http.Abstractions;
 using Orleans.Runtime;
 
 namespace comic_downloader_orleans.Grains;
@@ -10,6 +11,9 @@ public interface IComic : IGrainWithStringKey
 {
 
     Task Initialize(ComicState state);
+
+    [HttpGet("comics/{grainId}/test")]
+    Task<string> TestComic();
 }
 
 public class Comic : Grain<ComicState>, IComic, IRemindable
@@ -53,6 +57,13 @@ public class Comic : Grain<ComicState>, IComic, IRemindable
         State.Id = state.Id;
         State.Name = state.Name;
         await WriteStateAsync();
+    }
+
+    /// <inheritdoc />
+    public async Task<string> TestComic()
+    {
+        await OnDownloadComic();
+        return "Tested";
     }
 
     public Task ReceiveReminder(string reminderName, TickStatus status)

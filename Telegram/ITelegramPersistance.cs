@@ -1,4 +1,5 @@
 using comic_downloader_orleans.Grains;
+using Microsoft.AspNetCore.Mvc;
 using Orleans;
 using Orleans.Concurrency;
 using Telegram.Bot;
@@ -11,6 +12,9 @@ public interface ITelegramPersistance : IGrainWithIntegerKey
     Task AddUser(ITelegramUser user);
     Task RemoveUser(ITelegramUser user);
     Task SendComic(IComicImage comicImage);
+
+    [HttpPost("/telegram/message")]
+    Task OnMessage(Update update);
 }
 
 [StatelessWorker(1)]
@@ -66,9 +70,38 @@ public class TelegramPersistance : Grain<TelegramUserData>, ITelegramPersistance
 
         await WriteStateAsync();
     }
+
+    /// <inheritdoc />
+    public async Task OnMessage(Update update)
+    {
+        if (update.Message != null)
+        {
+            var telegramUser = GrainFactory.GetGrain<ITelegramUser>(update.Message.Chat.Id);
+
+            if (update.Message.Text == "/start") await AddUser(telegramUser);
+
+            if (update.Message.Text == "/stop") await RemoveUser(telegramUser);
+        }
+    }
 }
 
 public class TelegramUserData
 {
     public List<ITelegramUser> Users { get; set; } = new List<ITelegramUser>();
+}
+
+public class Update
+{
+    public Message Message { get; set; }
+}
+
+public class Message
+{
+    public Chat Chat { get; set; }
+    public string Text { get; set; }
+}
+
+public class Chat
+{
+    public long Id { get; set; }
 }
