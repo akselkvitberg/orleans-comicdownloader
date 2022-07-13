@@ -16,12 +16,7 @@ public static class OrleansExtensions
     {
         builder.Host.UseOrleans(c =>
         {
-            c.UseDashboard()
-                .Configure<ClusterOptions>(options =>
-                {
-                    options.ClusterId = "comicDownloader";
-                    options.ServiceId = "ComicDownloader";
-                });
+            c.UseDashboard();
 
             if (builder.Environment.IsDevelopment())
             {
@@ -34,25 +29,47 @@ public static class OrleansExtensions
             }
             else
             {
-                var endpointAddress = IPAddress.Parse(builder.Configuration["WEBSITE_PRIVATE_IP"]);
-                var strPorts = builder.Configuration["WEBSITE_PRIVATE_PORTS"].Split(',');
-                if (strPorts.Length < 2)
-                    throw new Exception("Insufficient private ports configured.");
-                var (siloPort, gatewayPort) =
-                    (int.Parse(strPorts[0]), int.Parse(strPorts[1]));
+                var siloPort = 11111;
+                var gatewayPort = 30000;
                 
+                // Is running as an App Service?
+                if (builder.Configuration["WEBSITE_PRIVATE_IP"] is { } ip &&
+                    builder.Configuration["WEBSITE_PRIVATE_PORTS"] is { } ports)
+                {
+                    var endpointAddress = IPAddress.Parse(ip);
+                    var splitPorts = ports.Split(',');
+                    if (splitPorts.Length < 2)
+                        throw new Exception("Insufficient private ports configured.");
 
-                c.ConfigureEndpoints(endpointAddress, siloPort, gatewayPort);
-                c.UseAzureStorageClustering(options => options.ConfigureTableServiceClient(builder.Configuration.GetValue<string>("azurestorage:connectionstring")));
+                    siloPort = int.Parse(splitPorts[0]);
+                    gatewayPort = int.Parse(splitPorts[1]);
+
+                    c.ConfigureEndpoints(endpointAddress, siloPort, gatewayPort);
+                }
+                else // Assume Azure Container Apps.
+                {
+                    c.ConfigureEndpoints(siloPort, gatewayPort);
+                }
+
+
+                var connectionString = builder.Configuration.GetValue<string>("azurestorage:connectionstring");
+
+                c.Configure<ClusterOptions>(options =>
+                {
+                    options.ClusterId = "comicDownloaderCluster";
+                    options.ServiceId = "ComicDownloader";
+                });
+                
+                c.UseAzureStorageClustering(options => options.ConfigureTableServiceClient(connectionString));
                 c.AddAzureTableGrainStorageAsDefault(options =>
                 {
                     options.ConfigureTableServiceClient(
-                        builder.Configuration.GetValue<string>("azurestorage:connectionstring"));
+                        connectionString);
                     options.UseJson = true;
                     options.IndentJson = true;
                     options.DeleteStateOnClear = true;
                 });
-                c.UseAzureTableReminderService(options => options.ConfigureTableServiceClient(builder.Configuration.GetValue<string>("azurestorage:connectionstring")));
+                c.UseAzureTableReminderService(options => options.ConfigureTableServiceClient(connectionString));
                 c.ConfigureLogging(logging => logging.AddConsole());
             }
 

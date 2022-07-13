@@ -5,6 +5,19 @@ VisualStudioVersion = 17.2.32602.215
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "comic-downloader-orleans", "comic-downloader-orleans.csproj", "{EC2FA5D0-9EC2-4025-A639-75E1A53D5FB1}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "workflows", "workflows", "{C957CDDE-217D-43F9-A8AB-8F09BA6D9ED9}"
+	ProjectSection(SolutionItems) = preProject
+		.github\workflows\deploy.yml = .github\workflows\deploy.yml
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "flex", "flex", "{AF705362-DD22-4E76-8D8D-683FA5984084}"
+	ProjectSection(SolutionItems) = preProject
+		.github\workflows\flex\container-app.bicep = .github\workflows\flex\container-app.bicep
+		.github\workflows\flex\environment.bicep = .github\workflows\flex\environment.bicep
+		.github\workflows\flex\main.bicep = .github\workflows\flex\main.bicep
+		.github\workflows\flex\storage.bicep = .github\workflows\flex\storage.bicep
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,5 +34,8 @@ Global
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {3694E7C7-AC5B-45B2-B8DA-2B5597560ED7}
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{AF705362-DD22-4E76-8D8D-683FA5984084} = {C957CDDE-217D-43F9-A8AB-8F09BA6D9ED9}
 	EndGlobalSection
 EndGlobal
