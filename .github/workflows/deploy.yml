@@ -8,7 +8,7 @@ on:
 env:
   UNIQUE_APP_NAME: comicdownorleans
   AZURE_RESOURCE_GROUP_NAME: comic-orleans
-  AZURE_RESOURCE_GROUP_LOCATION: northeu
+  AZURE_RESOURCE_GROUP_LOCATION: northeurope
 
 jobs:
   build-and-deploy:
