@@ -33,20 +33,18 @@ public class Comic : Grain<ComicState>, IComic, IRemindable
     private async Task SetupReminder()
     {
         var reminderName = this.GetPrimaryKeyString();
+        await RegisterOrUpdateReminder(reminderName, TimeSpan.FromMinutes(5), TimeSpan.FromHours(1));
 
-        var firstTick = DateTime.Today.AddHours(12).ToUniversalTime(); // start the reminder at 8pm EST
-        //var firstTick = DateTime.Now.AddSeconds(5).ToUniversalTime();
-        if (firstTick < DateTime.UtcNow)
-        {
-            // if the next start time has already passed, increase the startTime by a day
-            firstTick = firstTick.AddDays(1);
-        }
-
-        var nextFirstTick = firstTick - DateTime.UtcNow; // aka dueTime
-        var interval = TimeSpan.FromDays(1); // aka period
-        //var interval = TimeSpan.FromMinutes(1);
-
-        await RegisterOrUpdateReminder(reminderName, nextFirstTick, interval);
+        //var firstTick = DateTime.Today.AddHours(12).ToUniversalTime();
+        // if (firstTick < DateTime.UtcNow)
+        // {
+        //     // if the next start time has already passed, increase the startTime by a day
+        //     firstTick = firstTick.AddDays(1);
+        // }
+        //
+        // var nextFirstTick = firstTick - DateTime.UtcNow;
+        // var interval = TimeSpan.FromDays(1);
+        //await RegisterOrUpdateReminder(reminderName, nextFirstTick, interval);
     }
 
 
@@ -100,7 +98,6 @@ public class Comic : Grain<ComicState>, IComic, IRemindable
 
             State.Hashes.Add(hash);
             State.Images.Add(comicImage);
-            await WriteStateAsync();
         
             var telegramPersistance = GrainFactory.GetGrain<ITelegramPersistance>(0);
             await telegramPersistance.SendComic(comicImage);
@@ -110,6 +107,9 @@ public class Comic : Grain<ComicState>, IComic, IRemindable
                 var oneDrive = GrainFactory.GetGrain<IOneDrive>(0);
                 await oneDrive.SendComic(State.Name, comicImage);
             }
+            // delay writing untill we know we have forwarded the image to every recipient
+            // idea: make onedrive and telegram into a generic recipient grain that just forwards to their respective receivers? 
+            await WriteStateAsync();
         }
         catch (Exception e)
         {

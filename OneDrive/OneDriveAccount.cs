@@ -33,6 +33,8 @@ public class OneDriveAccount : Grain<OneDriveAccountState>, IOneDriveAccount, IR
 
     public async Task UploadFile(string folderName, string fileName, Immutable<byte[]> bytes)
     {
+        await RefreshToken();
+        
         var client = new GraphServiceClient(new DelegateAuthenticationProvider((requestMessage) =>
         {
             requestMessage.Headers.Authorization = new AuthenticationHeaderValue("Bearer", _accessToken);

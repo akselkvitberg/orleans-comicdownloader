@@ -1,6 +1,7 @@
 using System.Security.Cryptography;
 using Orleans;
 using Orleans.Concurrency;
+using Orleans.Runtime;
 
 namespace comic_downloader_orleans.Grains;
 
@@ -17,6 +18,13 @@ public interface IComicImage : IGrainWithGuidKey
 
 public class ComicImage : Grain<ComicImageData>, IComicImage
 {
+    private readonly IPersistentState<byte[]> _imageData;
+
+    public ComicImage([PersistentState("imagedata", "blobstorage")]IPersistentState<byte[]> imageData)
+    {
+        _imageData = imageData;
+    }
+    
     public Task Delete()
     {
         ClearStateAsync();
@@ -28,7 +36,8 @@ public class ComicImage : Grain<ComicImageData>, IComicImage
 
     public async Task SetData(Immutable<byte[]> data, string source)
     {
-        State.ImageData = data;
+        _imageData.State = data.Value;
+        await _imageData.WriteStateAsync();
         State.Hash = GenerateHash(data.Value);
         State.Source = source;
         State.Date = DateOnly.FromDateTime(DateTime.Now);
@@ -37,7 +46,7 @@ public class ComicImage : Grain<ComicImageData>, IComicImage
         await WriteStateAsync();
     }
 
-    public Task<Immutable<byte[]>> ImageData() => Task.FromResult(State.ImageData);
+    public Task<Immutable<byte[]>> ImageData() => Task.FromResult(_imageData.State.AsImmutable());
 
     private string GenerateHash(byte[] data)
     {
@@ -92,7 +101,6 @@ public class ComicImage : Grain<ComicImageData>, IComicImage
 
 public class ComicImageData
 {
-    public Immutable<byte[]> ImageData { get; set; }
     public string Hash { get; set; }
     public DateOnly Date { get; set; }
     public string Source { get; set; }
