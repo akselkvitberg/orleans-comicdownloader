@@ -18,9 +18,9 @@ public interface IComicImage : IGrainWithGuidKey
 
 public class ComicImage : Grain<ComicImageData>, IComicImage
 {
-    private readonly IPersistentState<byte[]> _imageData;
+    private readonly IPersistentState<ImageDataState> _imageData;
 
-    public ComicImage([PersistentState("imagedata", "blobstorage")]IPersistentState<byte[]> imageData)
+    public ComicImage([PersistentState("imagedata", "blobstorage")]IPersistentState<ImageDataState> imageData)
     {
         _imageData = imageData;
     }
@@ -36,7 +36,7 @@ public class ComicImage : Grain<ComicImageData>, IComicImage
 
     public async Task SetData(Immutable<byte[]> data, string source)
     {
-        _imageData.State = data.Value;
+        _imageData.State.Bytes = data.Value;
         await _imageData.WriteStateAsync();
         State.Hash = GenerateHash(data.Value);
         State.Source = source;
@@ -46,7 +46,7 @@ public class ComicImage : Grain<ComicImageData>, IComicImage
         await WriteStateAsync();
     }
 
-    public Task<Immutable<byte[]>> ImageData() => Task.FromResult(_imageData.State.AsImmutable());
+    public Task<Immutable<byte[]>> ImageData() => Task.FromResult(_imageData.State.Bytes.AsImmutable());
 
     private string GenerateHash(byte[] data)
     {
@@ -97,6 +97,11 @@ public class ComicImage : Grain<ComicImageData>, IComicImage
 
         return true;
     }
+}
+
+public class ImageDataState
+{
+    public byte[] Bytes { get; set; }
 }
 
 public class ComicImageData

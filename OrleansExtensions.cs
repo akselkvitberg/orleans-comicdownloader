@@ -23,7 +23,7 @@ public static class OrleansExtensions
             {
                 c.UseLocalhostClustering()
                     .AddMemoryGrainStorageAsDefault()
-                    .AddMemoryGrainStorage("imagedata")
+                    .AddMemoryGrainStorage("blobstorage")
                     .ConfigureEndpoints("localhost", 9889, 9099, AddressFamily.InterNetwork, true)
                     .UseInMemoryReminderService()
                     .AddStartupTask(StartupTask)
@@ -71,7 +71,7 @@ public static class OrleansExtensions
                     options.IndentJson = true;
                     options.DeleteStateOnClear = true;
                 });
-                c.AddAzureBlobGrainStorage("imagedata",
+                c.AddAzureBlobGrainStorage("blobstorage",
                     options => { options.ConfigureBlobServiceClient(connectionString); });
                 c.UseAzureTableReminderService(options => options.ConfigureTableServiceClient(connectionString));
                 c.ConfigureLogging(logging => logging.AddConsole());
