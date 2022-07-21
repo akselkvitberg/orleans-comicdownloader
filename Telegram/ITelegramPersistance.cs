@@ -20,11 +20,11 @@ public interface ITelegramPersistance : IGrainWithIntegerKey
 [StatelessWorker(1)]
 public class TelegramPersistance : Grain<TelegramUserData>, ITelegramPersistance
 {
-    private readonly ITelegramBotClient _botClient;
+    private readonly IHttpClientFactory _clientFactory;
 
-    public TelegramPersistance(ITelegramBotClient botClient)
+    public TelegramPersistance(IHttpClientFactory clientFactory)
     {
-        _botClient = botClient;
+        _clientFactory = clientFactory;
     }
 
     /// <inheritdoc />
@@ -51,13 +51,14 @@ public class TelegramPersistance : Grain<TelegramUserData>, ITelegramPersistance
     /// <inheritdoc />
     public async Task SendComic(IComicImage comicImage)
     {
+        var client = new TelegramBotClient(State.ApiKey, _clientFactory.CreateClient());
         var imageData = await comicImage.ImageData();
         foreach (var user in State.Users.ToList())
         {
             try
             {
                 var ms = new MemoryStream(imageData.Value);
-                await _botClient.SendPhotoAsync(user.GetPrimaryKeyLong(), new InputOnlineFile(ms));
+                await client.SendPhotoAsync(user.GetPrimaryKeyLong(), new InputOnlineFile(ms));
             }
             catch (Exception e)
             {
@@ -87,6 +88,7 @@ public class TelegramPersistance : Grain<TelegramUserData>, ITelegramPersistance
 
 public class TelegramUserData
 {
+    public string ApiKey { get; set; }
     public List<ITelegramUser> Users { get; set; } = new List<ITelegramUser>();
 }
 

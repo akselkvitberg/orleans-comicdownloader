@@ -17,6 +17,7 @@ public static class OrleansExtensions
         builder.Host.UseOrleans(c =>
         {
             c.UseDashboard();
+            c.AddApplicationInsightsTelemetryConsumer(builder.Configuration["appinsights_instrumentationkey"]);
 
             if (builder.Environment.IsDevelopment())
             {
@@ -32,7 +33,7 @@ public static class OrleansExtensions
             {
                 var siloPort = 11111;
                 var gatewayPort = 30000;
-                
+
                 // Is running as an App Service?
                 if (builder.Configuration["WEBSITE_PRIVATE_IP"] is { } ip &&
                     builder.Configuration["WEBSITE_PRIVATE_PORTS"] is { } ports)
@@ -53,14 +54,14 @@ public static class OrleansExtensions
                 }
 
 
-                var connectionString = builder.Configuration.GetValue<string>("azurestorage:connectionstring");
+                var connectionString = builder.Configuration.GetValue<string>("azurestorage_connectionstring");
 
                 c.Configure<ClusterOptions>(options =>
                 {
                     options.ClusterId = "comicDownloaderCluster";
                     options.ServiceId = "ComicDownloader";
                 });
-                
+
                 c.UseAzureStorageClustering(options => options.ConfigureTableServiceClient(connectionString));
                 c.AddAzureTableGrainStorageAsDefault(options =>
                 {
@@ -70,10 +71,8 @@ public static class OrleansExtensions
                     options.IndentJson = true;
                     options.DeleteStateOnClear = true;
                 });
-                c.AddAzureBlobGrainStorage("imagedata", options =>
-                {
-                    options.ConfigureBlobServiceClient(connectionString);
-                });
+                c.AddAzureBlobGrainStorage("imagedata",
+                    options => { options.ConfigureBlobServiceClient(connectionString); });
                 c.UseAzureTableReminderService(options => options.ConfigureTableServiceClient(connectionString));
                 c.ConfigureLogging(logging => logging.AddConsole());
             }
@@ -87,102 +86,102 @@ public static class OrleansExtensions
     {
         var grainFactory = provider.GetService<IGrainFactory>();
 
-        if (grainFactory != null)
+        if (grainFactory == null) return Task.CompletedTask;
+        
+        var pondusGrain = grainFactory.GetGrain<IComic>("Vg_Pondus");
+        pondusGrain.Initialize(new ComicState()
         {
-            var pondusGrain = grainFactory.GetGrain<IComic>("Vg_Pondus");
-            pondusGrain.Initialize(new ComicState()
-            {
-                Id = "pondus",
-                Name = "Pondus",
-                ComicHandler = ComicHandler.VG,
-            });
-
-            var gjesteGrain = grainFactory.GetGrain<IComic>("Vg_Gjesteserie");
-            gjesteGrain.Initialize(new ComicState()
-            {
-                Id = "gjesteserie",
-                Name = "VG Gjesteserie",
-                ComicHandler = ComicHandler.VG,
-            });
-
-            var hjalmarGrain = grainFactory.GetGrain<IComic>("Vg_Hjalmar");
-            hjalmarGrain.Initialize(new ComicState()
-            {
-                Id = "hjalmar",
-                Name = "Hjalmar",
-                ComicHandler = ComicHandler.VG,
-            });
-
-            var lunchGrain = grainFactory.GetGrain<IComic>("Vg_lunch");
-            lunchGrain.Initialize(new ComicState()
-            {
-                Id = "lunch",
-                Name = "Lunch VG",
-                ComicHandler = ComicHandler.VG,
-            });
-
-            var hannelandGrain = grainFactory.GetGrain<IComic>("Vg_hanneland");
-            hannelandGrain.Initialize(new ComicState()
-            {
-                Id = "hanneland",
-                Name = "Tegnehanne",
-                ComicHandler = ComicHandler.VG,
-            });
-
-            var storefriGrain = grainFactory.GetGrain<IComic>("Vg_storefri");
-            storefriGrain.Initialize(new ComicState()
-            {
-                Id = "storefri",
-                Name = "Storefri",
-                ComicHandler = ComicHandler.VG,
-            });
-
-            var xkcdGrain = grainFactory.GetGrain<IComic>("xkcd");
-            xkcdGrain.Initialize(new ComicState()
-            {
-                Id = "xkcd",
-                Name = "xkcd",
-                ComicHandler = ComicHandler.Xkcd,
-                Save = false,
-            });
-
-            var lunchTuGrain = grainFactory.GetGrain<IComic>("Tu_lunch");
-            lunchTuGrain.Initialize(new ComicState()
-            {
-                Id = "lunch",
-                Name = "Lunch TU",
-                ComicHandler = ComicHandler.TU,
-            });
-
-            var calvinGrain = grainFactory.GetGrain<IComic>("Calvin-Hobbes");
-            calvinGrain.Initialize(new ComicState()
-            {
-                Id = "https://www.comicsrss.com/rss/calvinandhobbes.rss",
-                Name = "Calvin and Hobbes",
-                ComicHandler = ComicHandler.Rss,
-                Save = true
-            });
-
-            var swordsGrain = grainFactory.GetGrain<IComic>("Swords");
-            swordsGrain.Initialize(new ComicState()
-            {
-                Id = "https://swordscomic.com/comic/feed/",
-                Name = "Swords",
-                ComicHandler = ComicHandler.Rss,
-            });
-
-            var configuration = provider.GetService<IConfiguration>();
-
-            var user = grainFactory.GetGrain<ITelegramUser>(configuration.GetValue<long>("telegram:initialUser"));
-            var persistance = grainFactory.GetGrain<ITelegramPersistance>(0);
-            persistance.AddUser(user);
-
-            var oneDriveAccount = grainFactory.GetGrain<IOneDriveAccount>(configuration["onedrive:username"]);
-            oneDriveAccount.Initialize(configuration["onedrive:clientId"], configuration["onedrive:refreshToken"]);
-
-            var oneDrive = grainFactory.GetGrain<IOneDrive>(0);
-            oneDrive.AddAccount(oneDriveAccount);
-        }
+            Id = "pondus",
+            Name = "Pondus",
+            ComicHandler = ComicHandler.VG,
+        });
+        
+        var gjesteGrain = grainFactory.GetGrain<IComic>("Vg_Gjesteserie");
+        gjesteGrain.Initialize(new ComicState()
+        {
+            Id = "gjesteserie",
+            Name = "VG Gjesteserie",
+            ComicHandler = ComicHandler.VG,
+        });
+        
+        var hjalmarGrain = grainFactory.GetGrain<IComic>("Vg_Hjalmar");
+        hjalmarGrain.Initialize(new ComicState()
+        {
+            Id = "hjalmar",
+            Name = "Hjalmar",
+            ComicHandler = ComicHandler.VG,
+        });
+        
+        var lunchGrain = grainFactory.GetGrain<IComic>("Vg_lunch");
+        lunchGrain.Initialize(new ComicState()
+        {
+            Id = "lunch",
+            Name = "Lunch VG",
+            ComicHandler = ComicHandler.VG,
+        });
+        
+        var hannelandGrain = grainFactory.GetGrain<IComic>("Vg_hanneland");
+        hannelandGrain.Initialize(new ComicState()
+        {
+            Id = "hanneland",
+            Name = "Tegnehanne",
+            ComicHandler = ComicHandler.VG,
+        });
+        
+        var storefriGrain = grainFactory.GetGrain<IComic>("Vg_storefri");
+        storefriGrain.Initialize(new ComicState()
+        {
+            Id = "storefri",
+            Name = "Storefri",
+            ComicHandler = ComicHandler.VG,
+        });
+        
+        var xkcdGrain = grainFactory.GetGrain<IComic>("xkcd");
+        xkcdGrain.Initialize(new ComicState()
+        {
+            Id = "xkcd",
+            Name = "xkcd",
+            ComicHandler = ComicHandler.Xkcd,
+            Save = false,
+        });
+        
+        var lunchTuGrain = grainFactory.GetGrain<IComic>("Tu_lunch");
+        lunchTuGrain.Initialize(new ComicState()
+        {
+            Id = "lunch",
+            Name = "Lunch TU",
+            ComicHandler = ComicHandler.TU,
+        });
+        
+        var calvinGrain = grainFactory.GetGrain<IComic>("Calvin-Hobbes");
+        calvinGrain.Initialize(new ComicState()
+        {
+            Id = "https://www.comicsrss.com/rss/calvinandhobbes.rss",
+            Name = "Calvin and Hobbes",
+            ComicHandler = ComicHandler.Rss,
+            Save = true,
+        });
+        
+        var swordsGrain = grainFactory.GetGrain<IComic>("Swords");
+        swordsGrain.Initialize(new ComicState()
+        {
+            Id = "https://swordscomic.com/comic/feed/",
+            Name = "Swords",
+            ComicHandler = ComicHandler.Rss,
+        });
+        
+        //var configuration = provider.GetService<IConfiguration>();
+        //var telegramPersistance = grainFactory.GetGrain<TelegramPersistance>(0);
+        
+        // var user = grainFactory.GetGrain<ITelegramUser>(configuration.GetValue<long>("telegram:initialUser"));
+        // var persistance = grainFactory.GetGrain<ITelegramPersistance>(0);
+        // persistance.AddUser(user);
+        
+        // var oneDriveAccount = grainFactory.GetGrain<IOneDriveAccount>(configuration["onedrive:username"]);
+        // oneDriveAccount.Initialize(configuration["onedrive:clientId"], configuration["onedrive:refreshToken"]);
+        
+        // var oneDrive = grainFactory.GetGrain<IOneDrive>(0);
+        // oneDrive.AddAccount(oneDriveAccount);
 
         return Task.CompletedTask;
     }
