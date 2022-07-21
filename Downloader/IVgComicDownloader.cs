@@ -20,7 +20,7 @@ public class VgComicDownloader : Grain, IVgComicDownloader
 
     public async Task<Immutable<byte[]>> Download()
     {
-        var vgCookie = await GrainFactory.GetGrain<VgCookie>(0).Cookie();
+        var vgCookie = await GrainFactory.GetGrain<IVgCookie>(0).Cookie();
         
         var httpClient = _clientFactory.CreateClient();
         httpClient.DefaultRequestHeaders.Add("Cookie", new []{ "SP_ID=" + vgCookie});
