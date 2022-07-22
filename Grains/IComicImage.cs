@@ -25,10 +25,10 @@ public class ComicImage : Grain<ComicImageData>, IComicImage
         _imageData = imageData;
     }
     
-    public Task Delete()
+    public async Task Delete()
     {
-        ClearStateAsync();
-        return Task.CompletedTask;
+        await ClearStateAsync();
+        await _imageData.ClearStateAsync();
     }
 
     public Task<string> Hash() => Task.FromResult(State.Hash);
