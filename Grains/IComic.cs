@@ -60,7 +60,15 @@ public class Comic : Grain<ComicState>, IComic, IRemindable
     /// <inheritdoc />
     public async Task<string> TestComic()
     {
-        await OnDownloadComic();
+        try
+        {
+            await OnDownloadComic();
+        }
+        catch (Exception e)
+        {
+            _logger.LogError(e, "Tested comic {Name} but got exception {Exception}", this.GetPrimaryKeyString(), e.Message);
+            return e.Message;
+        }
         return "Tested";
     }
 
@@ -73,6 +81,8 @@ public class Comic : Grain<ComicState>, IComic, IRemindable
     private async Task OnDownloadComic()
     {
         _logger.LogInformation("Reminder called");
+        if(State.Id == null)
+            return;
         try
         {
             IComicDownloader downloader = State.ComicHandler switch

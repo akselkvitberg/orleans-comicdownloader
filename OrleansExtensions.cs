@@ -18,6 +18,7 @@ public static class OrleansExtensions
         {
             c.UseDashboard();
             c.AddApplicationInsightsTelemetryConsumer(builder.Configuration["appinsights_instrumentationkey"]);
+            c.AddStartupTask(StartupTask);
 
             if (builder.Environment.IsDevelopment())
             {
@@ -26,7 +27,6 @@ public static class OrleansExtensions
                     .AddMemoryGrainStorage("blobstorage")
                     .ConfigureEndpoints("localhost", 9889, 9099, AddressFamily.InterNetwork, true)
                     .UseInMemoryReminderService()
-                    .AddStartupTask(StartupTask)
                     .ConfigureLogging(logging => logging.AddConsole());
             }
             else
@@ -170,19 +170,6 @@ public static class OrleansExtensions
             ComicHandler = ComicHandler.Rss,
         });
         
-        //var configuration = provider.GetService<IConfiguration>();
-        //var telegramPersistance = grainFactory.GetGrain<TelegramPersistance>(0);
-        
-        // var user = grainFactory.GetGrain<ITelegramUser>(configuration.GetValue<long>("telegram:initialUser"));
-        // var persistance = grainFactory.GetGrain<ITelegramPersistance>(0);
-        // persistance.AddUser(user);
-        
-        // var oneDriveAccount = grainFactory.GetGrain<IOneDriveAccount>(configuration["onedrive:username"]);
-        // oneDriveAccount.Initialize(configuration["onedrive:clientId"], configuration["onedrive:refreshToken"]);
-        
-        // var oneDrive = grainFactory.GetGrain<IOneDrive>(0);
-        // oneDrive.AddAccount(oneDriveAccount);
-
         return Task.CompletedTask;
     }
 }
