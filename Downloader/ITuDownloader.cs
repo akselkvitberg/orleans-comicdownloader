@@ -22,7 +22,7 @@ public class TuDownloader : Grain, ITuDownloader
     {
         var httpClient = _factory.CreateClient();
 
-        var bytes = await httpClient.GetByteArrayAsync($"https://www.tu.no/?module=TekComics&service=image&id={this.GetPrimaryKeyString()}&key={DateTime.Now:yyyy-MM-dd}");
+        var bytes = await httpClient.GetByteArrayAsync($"https://www.tu.no/api/widgets/comics?name={this.GetPrimaryKeyString()}&date={DateTime.Now:yyyy-MM-dd}");
 
         return bytes.AsImmutable();
     }
