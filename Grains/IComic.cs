@@ -91,6 +91,7 @@ public class Comic : Grain<ComicState>, IComic, IRemindable
                 ComicHandler.TU => GrainFactory.GetGrain<ITuDownloader>(State.Id),
                 ComicHandler.Xkcd => GrainFactory.GetGrain<IXkcdDownloader>(0),
                 ComicHandler.Rss => GrainFactory.GetGrain<IRssDownloader>(State.Id),
+                ComicHandler.Url => GrainFactory.GetGrain<IUrlDownloader>(State.Id),
                 _ => GrainFactory.GetGrain<IVgComicDownloader>(State.Id),
             };
             
@@ -146,4 +147,5 @@ public enum ComicHandler
     TU = 2,
     Xkcd = 3,
     Rss = 4,
+    Url
 }

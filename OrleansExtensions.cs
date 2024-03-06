@@ -169,6 +169,15 @@ public static class OrleansExtensions
             Name = "Swords",
             ComicHandler = ComicHandler.Rss,
         });
+
+        var e24Grain = grainFactory.GetGrain<IComic>("e24");
+        e24Grain.Initialize(new ComicState()
+        {
+            Id = "https://api.e24.no/content/v1/comics/{0:yyyy}-{0:MM}-{0:dd}",
+            Name = "E24",
+            Save = true,
+            ComicHandler = ComicHandler.Url,
+        });
         
         return Task.CompletedTask;
     }
